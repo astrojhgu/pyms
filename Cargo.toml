@@ -1,0 +1,23 @@
+[package]
+name = "pyms"
+version = "0.1.0"
+authors = ["Gu Junhua <jhgu@nao.cas.cn>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+num-traits = "0.2.9"
+pyo3 = {version="0.8.2", features=["python3", "extension-module"]}
+ndarray = "0.13.0"
+map_solver = {path='../map_solver'}
+simobs = {path='../simobs'}
+sprs = '0.7.1'
+numpy = "0.7.0"
+linear_solver={path='../linear_solver'}
+scorus={git = 'https://github.com/astrojhgu/scorus.git'}
+
+
+[lib]
+name = "pyms"
+crate-type = ["cdylib"]
