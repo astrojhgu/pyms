@@ -16,7 +16,7 @@ def csmat2sparse(mat):
     return coo_matrix((v, (i,j)))
     
 
-def brute_solver(ptr_mats, tods, noises, tol=1e-10, m_max=50):
+def brute_solver_mo(ptr_mats, tods, noises, tol=1e-10, m_max=50):
     solver=native.empty_brute_solver_mo(tol, m_max);
     for p, t, n in zip(ptr_mats, tods, noises):
         h,w=p.shape
