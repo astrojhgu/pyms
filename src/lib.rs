@@ -1,3 +1,6 @@
+#![allow(unused_variables)]
+#![allow(unused_imports)]
+
 use num_traits::float::FloatConst;
 use pyo3::prelude::*;
 use pyo3::types::{PyList};
