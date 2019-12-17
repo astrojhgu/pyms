@@ -3,7 +3,7 @@ import numpy as np
 from scipy.sparse.coo import coo_matrix
 import matplotlib.pylab as plt
 import itertools
-
+import functools
 def sparse2csmat(mat):
     col=mat.col
     row=mat.row
@@ -66,4 +66,35 @@ def plot_hit_map(ptr_mat, pixel_list):
 
     plt.imshow(image, aspect='auto')
     plt.colorbar()
-    
+
+def plot_hit_map_mo(ptr_mat_list, pixel_list):        
+    h=functools.reduce(lambda x,y:x+y, map(lambda x: np.sum(x, axis=0),ptr_mat_list))
+    h=np.array(h).squeeze()
+    #print(np.max(np.sum(ptr_mat, axis=0)))
+    i_min=int(np.min(pixel_list[:,0]))
+    i_max=int(np.max(pixel_list[:,0]))
+    j_min=int(np.min(pixel_list[:,1]))
+    j_max=int(np.max(pixel_list[:,1]))
+
+    image=np.zeros([i_max-i_min+1, j_max-j_min+1])
+
+    for n in range(0, pixel_list.shape[0]):
+        i,j=pixel_list[n,:]
+        image[i-i_min, j-j_min]=h[n]
+
+    plt.imshow(image, aspect='auto')
+    plt.colorbar()
+
+def fill_map(values, pixel_list):
+    i_min=int(np.min(pixel_list[:,0]))
+    i_max=int(np.max(pixel_list[:,0]))
+    j_min=int(np.min(pixel_list[:,1]))
+    j_max=int(np.max(pixel_list[:,1]))
+
+    image=np.zeros([i_max-i_min+1, j_max-j_min+1])*np.NaN
+
+
+    for (i,j,v) in zip(pixel_list[:,0], pixel_list[:,1], values):
+        image[i-i_min,j-j_min]=v
+
+    return image
