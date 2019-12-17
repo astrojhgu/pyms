@@ -13,7 +13,9 @@ def sparse2csmat(mat):
 
 def csmat2sparse(mat):
     (i, j, v)=mat.internal_data()
-    return coo_matrix((v, (i,j)))
+    rows=mat.nrows()
+    cols=mat.ncols()
+    return coo_matrix((v, (i,j)), shape=(rows, cols))
     
 
 def brute_solver_mo(ptr_mats, tods, noises, tol=1e-10, m_max=50):
@@ -25,6 +27,9 @@ def brute_solver_mo(ptr_mats, tods, noises, tol=1e-10, m_max=50):
         p1=sparse2csmat(p)
         native.add_obs(solver, p1, t.astype('float64'), n.astype('float64'))
     return solver
+
+def solve(s):
+    return native.brute_solve(s)
 
 def define_pixels(ra_deg, dec_deg, pixel_size, fov_center_deg=None):
     fov_center_ra, fov_center_dec=fov_center_deg if fov_center_deg is not None else native.auto_fov_center(ra_deg, dec_deg)
@@ -42,7 +47,6 @@ def define_pixels_mo(ra_deg_list, dec_deg_list, pixel_size, fov_center_deg=None)
     dec_deg_list=[i.astype('float64') for i in dec_deg_list]
 
     (ptr_mat, pixels)=native.define_pixels_mo(ra_deg_list, dec_deg_list, fov_center_ra, fov_center_dec, pixel_size)
-    
     return ([csmat2sparse(i) for i in ptr_mat], pixels)
 
 

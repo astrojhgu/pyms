@@ -163,7 +163,6 @@ fn native(_py: Python, m: &PyModule)->PyResult<()>{
         let (ptr_mat_vec, pix_idx)=gridder.get_ptr_matrix_mo(&sph_list_ref[..]);
         //let ff=PyList::new(py, ptr_mat_vec.iter());
         let pix_idx=pix_idx.map(|&x| x as i64);
-
         let ptr_mat:Vec<_>=ptr_mat_vec.into_iter().map(|m| PyCsMatF64{data: m}).collect();
 
         (ptr_mat, pix_idx.into_pyarray(py).to_owned())
