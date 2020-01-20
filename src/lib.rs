@@ -98,13 +98,15 @@ fn native(_py: Python, m: &PyModule)->PyResult<()>{
             None=>{
                 println!("No initial guess set, use naive solve to initial it");
                 let mp = NaiveSkySolverMo::new(solver.solver.ptr_mat.clone(), solver.solver.tod.clone())
-                    .with_tol(1e-10)
-                    .with_m_max(50);
+                    .with_tol(1e-3)
+                    .with_m_max(150);
                     solver.solver.set_init_value(mp.solve_sky())
             }
             _ => {}
         }
-        solver.solver.solve_sky(100, None).into_pyarray(py).to_owned()
+        let x=solver.solver.solve_sky(100, None);
+        solver.solver.x=Some(x.clone());
+        x.into_pyarray(py).to_owned()
     }
 
     #[pyfn(m, "auto_fov_center")]
@@ -167,6 +169,39 @@ fn native(_py: Python, m: &PyModule)->PyResult<()>{
 
         (ptr_mat, pix_idx.into_pyarray(py).to_owned())
     }
+
+    #[pyfn(m, "define_pixels_mo_gaussian")]
+    fn define_pixels_mo_gaussian(py: Python, ra_list: &PyList, dec_list: &PyList, fov_center_ra: f64, fov_center_dec: f64, pix_size_deg: f64, rcut_deg: f64, sigma_deg: f64)->(Vec<PyCsMatF64>, Py<PyArray2<i64>>)
+    {
+        let fov_center=SphCoord::new(f64::PI() / 2.0 - fov_center_dec.to_radians(), fov_center_ra.to_radians());
+
+        let step=pix_size_deg.to_radians();
+        
+       let mut sph_lists:Vec<_>=Vec::new();
+
+        for (ra, dec) in ra_list.iter().zip(dec_list.iter()){
+            let ra1=<&PyArray1::<f64> as FromPyObject>::extract(ra).unwrap().as_array().map(|&x| x.to_radians());
+            let dec1=<&PyArray1::<f64> as FromPyObject>::extract(dec).unwrap().as_array().map(|&x| x.to_radians());
+
+            let sph_list:Vec<_> = ra1
+                .iter()
+                .zip(dec1.iter())
+                .map(|(&r, &d)| SphCoord::new(f64::PI() / 2.0 - d, r))
+                .collect();
+
+            sph_lists.push(sph_list);
+        }
+        
+        let sph_list_ref:Vec<_>=sph_lists.iter().map(|x|{&x[..]}).collect();
+        let gridder = Gridder::new(fov_center.pol, fov_center.az, step, step);
+        let (ptr_mat_vec, pix_idx)=gridder.get_ptr_matrix_mo_gaussian(&sph_list_ref[..], rcut_deg.to_radians(), sigma_deg.to_radians());
+        //let ff=PyList::new(py, ptr_mat_vec.iter());
+        let pix_idx=pix_idx.map(|&x| x as i64);
+        let ptr_mat:Vec<_>=ptr_mat_vec.into_iter().map(|m| PyCsMatF64{data: m}).collect();
+
+        (ptr_mat, pix_idx.into_pyarray(py).to_owned())
+    }
+
 
     Ok(())
 }

@@ -1,6 +1,6 @@
 [dependencies]
 ndarray = '0.13.0'
-num-traits = '0.2.10'
+num-traits = '0.2.11'
 numpy = '0.7.0'
 sprs = '0.7.1'
 
@@ -15,7 +15,7 @@ features = [
     'python3',
     'extension-module',
 ]
-version = '0.8.3'
+version = '0.8.5'
 
 [dependencies.scorus]
 git = 'https://github.com/astrojhgu/scorus.git'
